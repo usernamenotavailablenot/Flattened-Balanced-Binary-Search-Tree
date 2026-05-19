@@ -1,24 +1,19 @@
 ﻿namespace B3Tree
 {
-    internal enum COLOR
-    {
-        RED,
-        BLACK
-    }
     internal class B3TreeNode<K, V> where K : IComparable
     {
         public K[] Keys;
         public V[] Values;
         public B3TreeNode<K, V>? Left;
         public B3TreeNode<K, V>? Right;
-        public COLOR Color;
+        public bool IsRed;
         public int Len;
         public B3TreeNode(int capacity)
         {
             Keys = new K[capacity];
             Values = new V[capacity];
             Len = 0;
-            Color = COLOR.RED;
+            IsRed = true;
         }
         public void Shrink(int newLen)
         {
@@ -45,7 +40,7 @@
             HALF = 2 * MIN;
             MAX = 4 * MIN;
             _root = new B3TreeNode<K, V>(MAX);
-            _root.Color = COLOR.BLACK;
+            _root.IsRed = false;
         }
         public V GetValue(K key)
         {
@@ -58,7 +53,7 @@
         public void Add(K key, V value)
         {
             _root = AddRecur(key, value, _root);
-            _root.Color = COLOR.BLACK;
+            _root.IsRed = false;
         }
         public void Remove(K key)
         {
@@ -68,7 +63,7 @@
             _root = RemoveRecur(key, _root);
             _handleLeaf = false;
             _isDB = false;
-            _root.Color = COLOR.BLACK;
+            _root.IsRed = false;
         }
         private static V GetValueRecur(K key, B3TreeNode<K, V> node)
         {
@@ -254,7 +249,7 @@
             {
                 // merge from Left child
                 MergeFromPre(node, node.Left);
-                _isDB = (node.Left.Color == COLOR.BLACK);
+                _isDB = (!node.Left.IsRed);
                 node.Left = null;
             }
             else
@@ -297,7 +292,7 @@
                 {
                     // merge
                     MergeFromNext(pNode, curNode);
-                    _isDB = (curNode.Color == COLOR.BLACK);
+                    _isDB = (!curNode.IsRed);
                     return null;
                 }
                 else
@@ -329,69 +324,69 @@
             {
                 return parent;
             }
-            if (GetColor(child) == COLOR.RED)
+            if (IsRed(child))
             {
-                child!.Color = COLOR.BLACK;
+                child!.IsRed = false;
                 _isDB = false;
                 return parent;
             }
             // Black and DB
             if (parent.Left == child)
             {
-                COLOR pc = parent.Color;
-                COLOR px = GetColor(parent.Right!.Left);
+                bool pc = parent.IsRed;
+                bool px = IsRed(parent.Right!.Left);
                 B3TreeNode<K, V> nd = LeftRotation(parent);
-                if (px == COLOR.BLACK)
+                if (!px)
                 {
-                    nd.Left!.Color = COLOR.RED;
-                    _isDB = (pc == COLOR.BLACK);
+                    nd.Left!.IsRed = true;
+                    _isDB = (!pc);
                     return nd;
                 }
                 else
                 {
                     nd.Left = LeftRotation(nd.Left!);
                     nd = RightRotation(nd);
-                    nd.Left!.Color = COLOR.BLACK;
-                    nd.Color = pc;
+                    nd.Left!.IsRed = false;
+                    nd.IsRed = pc;
                     _isDB = false;
                     return nd;
                 }
             }
             else // right
             {
-                if (parent.Color == COLOR.RED)
+                if (parent.IsRed)
                 {
-                    if (GetColor(parent.Left!.Left) == COLOR.RED)
+                    if (IsRed(parent.Left!.Left))
                     {
                         var nd = RightRotation(parent);
-                        nd.Left!.Color = COLOR.BLACK;
-                        nd.Right!.Color = COLOR.BLACK;
-                        nd.Color = COLOR.RED;
+                        nd.Left!.IsRed = false;
+                        nd.Right!.IsRed = false;
+                        nd.IsRed = true;
                         _isDB = false;
                         return nd;
                     }
                     else
                     {
-                        parent.Color = COLOR.BLACK;
-                        parent.Left.Color = COLOR.RED;
+                        parent.IsRed = false;
+                        parent.Left.IsRed = true;
                         _isDB = false;
                         return parent;
                     }
                 }
                 else // parent is black
                 {
-                    if (parent.Left!.Color == COLOR.BLACK)
+                    if (!parent.Left!.IsRed)
                     {
-                        if (GetColor(parent.Left.Left) == COLOR.BLACK)
+                        if (!IsRed(parent.Left.Left))
                         {
-                            parent.Left.Color = COLOR.RED;
+                            parent.Left.IsRed = true;
                             _isDB = true;
                             return parent;
                         }
                         else
                         {
                             var nd = RightRotation(parent);
-                            nd.Left!.Color = COLOR.BLACK;
+                            nd.Left!.IsRed = false;
                             _isDB = false;
                             return nd;
                         }
@@ -399,15 +394,15 @@
                     else
                     {
                         var nd = RightRotation(parent);
-                        nd.Color = COLOR.BLACK;
-                        nd.Right!.Left!.Color = COLOR.RED;
+                        nd.IsRed = false;
+                        nd.Right!.Left!.IsRed = true;
                         if (IsDoubleRed(nd.Right.Left))
                         {
                             nd.Right = RightRotation(nd.Right);
-                            nd.Right.Left!.Color = COLOR.BLACK;
+                            nd.Right.Left!.IsRed = false;
                             nd = LeftRotation(nd);
-                            nd.Color = COLOR.BLACK;
-                            nd.Left!.Color = COLOR.RED;
+                            nd.IsRed = false;
+                            nd.Left!.IsRed = true;
                         }
                         _isDB = false;
                         return nd;
@@ -458,17 +453,17 @@
             tmp!.Right = node;
             return tmp;
         }
-        private static COLOR GetColor(B3TreeNode<K, V>? node)
+        private static bool IsRed(B3TreeNode<K, V>? node)
         {
             if (node == null)
             {
-                return COLOR.BLACK;
+                return false;
             }
-            return node.Color;
+            return node.IsRed;
         }
         private static bool IsDoubleRed(B3TreeNode<K, V>? node)
         {
-            if (GetColor(node) == COLOR.RED && GetColor(node!.Left) == COLOR.RED)
+            if (IsRed(node) && IsRed(node!.Left))
             {
                 return true;
             }
@@ -479,26 +474,26 @@
             if (IsDoubleRed(node.Left))
             {
                 node = RightRotation(node);
-                node.Left!.Color = COLOR.BLACK;
+                node.Left!.IsRed = false;
             }
             return node;
         }
         private static B3TreeNode<K, V> ResolveRightRed(B3TreeNode<K, V> node)
         {
-            if (GetColor(node.Right) == COLOR.RED)
+            if (IsRed(node.Right))
             {
-                if (GetColor(node.Left) == COLOR.RED) // flip color
+                if (IsRed(node.Left)) // flip color
                 {
-                    node.Left!.Color = COLOR.BLACK;
-                    node.Right!.Color = COLOR.BLACK;
-                    node.Color = COLOR.RED;
+                    node.Left!.IsRed = false;
+                    node.Right!.IsRed = false;
+                    node.IsRed = true;
                 }
                 else
                 {
-                    COLOR c = node.Color;
+                    bool c = node.IsRed;
                     node = LeftRotation(node);
-                    node.Left!.Color = COLOR.RED;
-                    node.Color = c;
+                    node.Left!.IsRed = true;
+                    node.IsRed = c;
                 }
             }
             return node;

@@ -10,22 +10,45 @@ namespace UnitTest
         public void TestB3Trees()
         {
             int N = 100000;
+            int MIN = 128;
+            int TRIAL = 10;
+            int STEP = 1;
+            Stopwatch sw = new Stopwatch();
             int[] insert = new int[N];
             int[] delete = new int[N];
+            Dictionary<int, int>[] performance = new Dictionary<int, int>[TRIAL];
+            for (int i = 0; i < TRIAL; ++i)
+            {
+                performance[i] = new Dictionary<int, int>();
+            }
             for (int i = 0; i < N; ++i)
             {
                 insert[i] = i;
                 delete[i] = i;
             }
-            Shuffle(insert);
-            Shuffle(delete);
-            for (int i = 1; i <= 128; ++i)
+            for (int trial = 1; trial <= TRIAL; trial += 1) 
             {
-                B3Tree<int, int> b3 = new B3Tree<int, int>(i);
-                Stopwatch sw = Stopwatch.StartNew();
-                TestB3Tree(b3, insert, delete, N);
-                sw.Stop();
-                Console.WriteLine($"min = '{i}', time spent '{sw.ElapsedMilliseconds}' Milliseconds.");
+                Shuffle(insert);
+                Shuffle(delete);
+                for (int min = 0; min <= MIN; min += STEP)
+                {
+                    B3Tree<int, int> b3 = new B3Tree<int, int>(min);
+                    sw.Start();
+                    TestB3Tree(b3, insert, delete, N);
+                    sw.Stop();
+                    performance[trial - 1].Add(min, (int)sw.ElapsedMilliseconds); 
+                    sw.Reset();
+                }
+            }
+            foreach (int min in performance[0].Keys.OrderBy(j => j))
+            {
+                Console.Write($"min = {(min).ToString("D3")}");
+                for (int j = 0; j < TRIAL; ++j)
+                {
+                    int ms = performance[j][min];
+                    Console.Write($" {ms}");
+                }
+                Console.WriteLine();
             }
         }
         private void TestB3Tree(B3Tree<int, int> b3, int[] insert, int[] delete, int N)
