@@ -33,6 +33,7 @@ namespace UnitTest
                 for (int min = 0; min <= MIN; min += STEP)
                 {
                     B3Tree<int, int> b3 = new B3Tree<int, int>(min);
+                    GC.Collect();
                     sw.Start();
                     TestB3Tree(b3, insert, delete, N);
                     sw.Stop();
