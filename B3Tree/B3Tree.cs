@@ -1,32 +1,64 @@
 ﻿namespace B3Tree
 {
-    internal class B3TreeNode<K, V> where K : IComparable
-    {
-        public K[] Keys;
-        public V[] Values;
-        public B3TreeNode<K, V>? Left;
-        public B3TreeNode<K, V>? Right;
-        public bool IsRed;
-        public int Len;
-        public B3TreeNode(int capacity)
-        {
-            Keys = new K[capacity];
-            Values = new V[capacity];
-            Len = 0;
-            IsRed = true;
-        }
-        public void Shrink(int newLen)
-        {
-            for (int i = newLen; i < this.Len; ++i)
-            {
-                this.Keys[i] = default!;
-                this.Values[i] = default!;
-            }
-            this.Len = newLen;
-        }
-    }
     public class B3Tree<K, V> where K : IComparable
     {
+        private class B3TreeNode <KK, VV> where KK : IComparable
+        {
+            private short _len;
+            public KK[] Keys;
+            public VV[] Values;
+            public B3TreeNode<KK, VV>? Left;
+            public B3TreeNode<KK, VV>? Right;
+            public bool IsRed
+            {
+                get => _len < 0;
+                set
+                {
+                    if (value)
+                    {
+                        // red
+                        _len = (short)(_len | 0x8000); // 1000000000000000
+                    }
+                    else
+                    {
+                        // black
+                        _len = (short)(_len & 0x7fff); // 0111111111111111
+                    }
+                }
+            }
+            public int Len
+            {
+                get => _len & 0x7fff;
+                set
+                {
+                    if (IsRed)
+                    {
+                        _len = (short)(value | 0x8000);
+                    }
+                    else
+                    {
+                        _len = (short)value;
+                    }
+                }
+            }
+            public B3TreeNode(int capacity)
+            {
+                Keys = new KK[capacity];
+                Values = new VV[capacity];
+                Len = 0;
+                IsRed = true;
+            }
+            public void Shrink(int newLen)
+            {
+                for (int i = newLen; i < this.Len; ++i)
+                {
+                    this.Keys[i] = default!;
+                    this.Values[i] = default!;
+                }
+                this.Len = newLen;
+            }
+        }
+
         private readonly int MAX; // capacity
         private readonly int MIN; // quarter of capacity
         private readonly int HALF; // half of capacity
