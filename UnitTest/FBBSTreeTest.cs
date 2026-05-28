@@ -1,13 +1,13 @@
-﻿using B3Tree;
+﻿using FBBST;
 using System.Diagnostics;
 
 namespace UnitTest
 {
     [TestClass]
-    public class B3Test
+    public class FBBSTreeTest
     {
         [TestMethod]
-        public void TestB3Trees()
+        public void TestFBBSTree()
         {
             int N = 100000;
             int MIN = 128;
@@ -32,10 +32,10 @@ namespace UnitTest
                 Shuffle(delete);
                 for (int min = 0; min <= MIN; min += STEP)
                 {
-                    B3Tree<int, int> b3 = new B3Tree<int, int>(min);
+                    FBBSTree<int, int> fbbst = new FBBSTree<int, int>(min);
                     GC.Collect();
                     sw.Start();
-                    TestB3Tree(b3, insert, delete, N);
+                    TestFbbsTree(fbbst, insert, delete, N);
                     sw.Stop();
                     performance[trial - 1].Add(min, (int)sw.ElapsedMilliseconds); 
                     sw.Reset();
@@ -52,20 +52,20 @@ namespace UnitTest
                 Console.WriteLine();
             }
         }
-        private void TestB3Tree(B3Tree<int, int> b3, int[] insert, int[] delete, int N)
+        private void TestFbbsTree(FBBSTree<int, int> tree, int[] insert, int[] delete, int N)
         {
             for (int i = 0; i < N; ++i)
             {
                 int k = insert[i];
-                b3.Add(k, k);
-                bool b = b3.HasKey(k);
+                tree.Add(k, k);
+                bool b = tree.HasKey(k);
                 Assert.IsTrue(b);
             }
             for (int i = 0; i < N; ++i)
             {
                 int k = delete[i];
-                b3.Remove(k);
-                bool b = b3.HasKey(k);
+                tree.Remove(k);
+                bool b = tree.HasKey(k);
                 Assert.IsFalse(b);
             }
         }

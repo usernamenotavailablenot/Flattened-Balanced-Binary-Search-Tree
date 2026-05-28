@@ -1,14 +1,14 @@
-﻿namespace B3Tree
+﻿namespace FBBST
 {
-    public class B3Tree<K, V> where K : IComparable
+    public class FBBSTree<K, V> where K : IComparable
     {
-        private class B3TreeNode
+        private class FBBSTreeNode
         {
             private short _len; // one bit for color, other 15 bits for length
             public K[] Keys;
             public V[] Values;
-            public B3TreeNode? Left;
-            public B3TreeNode? Right;
+            public FBBSTreeNode? Left;
+            public FBBSTreeNode? Right;
             public bool IsRed
             {
                 get => _len < 0;
@@ -17,23 +17,23 @@
                     if (value)
                     {
                         // red
-                        _len = (short)(_len | 0x8000); // 1000000000000000
+                        _len = (short)(_len | 0b1000000000000000);
                     }
                     else
                     {
                         // black
-                        _len = (short)(_len & 0x7fff); // 0111111111111111
+                        _len = (short)(_len & 0b0111111111111111);
                     }
                 }
             }
             public int Len
             {
-                get => _len & 0x7fff; // 0111111111111111
+                get => _len & 0b0111111111111111;
                 set
                 {
                     if (IsRed)
                     {
-                        _len = (short)(value | 0x8000); // 1000000000000000
+                        _len = (short)(value | 0b1000000000000000);
                     }
                     else
                     {
@@ -41,7 +41,7 @@
                     }
                 }
             }
-            public B3TreeNode(int capacity)
+            public FBBSTreeNode(int capacity)
             {
                 Keys = new K[capacity];
                 Values = new V[capacity];
@@ -61,16 +61,16 @@
         private readonly int MAX; // capacity
         private readonly int MIN; // quarter of capacity
         private readonly int HALF; // half of capacity
-        private B3TreeNode _root;
+        private FBBSTreeNode _root;
         private bool _isDB = false; // label for double black
         private bool _handleLeaf = false; // predecessor/successor of a leaf node is its parent
         public V? Deleted = default!;
-        public B3Tree(int min)
+        public FBBSTree(int min)
         {
             MIN = min < 1 ? 1 : (min > 4096 ? 4096 : min);
             HALF = 2 * MIN;
             MAX = 4 * MIN;
-            _root = new B3TreeNode(MAX);
+            _root = new FBBSTreeNode(MAX);
             _root.IsRed = false;
         }
         public V GetValue(K key)
@@ -96,7 +96,7 @@
             _isDB = false;
             _root.IsRed = false;
         }
-        private static V GetValueRecur(K key, B3TreeNode node)
+        private static V GetValueRecur(K key, FBBSTreeNode node)
         {
             if (node.Left != null && key.CompareTo(node.Keys[0]) < 0)
             {
@@ -117,7 +117,7 @@
                 throw new IndexOutOfRangeException();
             }
         }
-        private static bool HasValueRecur(K key, B3TreeNode node)
+        private static bool HasValueRecur(K key, FBBSTreeNode node)
         {
             if (node.Left != null && key.CompareTo(node.Keys[0]) < 0)
             {
@@ -131,7 +131,7 @@
             _ = FindIndex(node, key, out found);
             return found;
         }
-        private B3TreeNode AddRecur(K key, V value, B3TreeNode node)
+        private FBBSTreeNode AddRecur(K key, V value, FBBSTreeNode node)
         {
             if (node.Left != null && key.CompareTo(node.Keys[0]) < 0)
             {
@@ -168,14 +168,14 @@
                 return node;
             }
             // split
-            B3TreeNode newNode = SplitNode(node, idx, key, value);
+            FBBSTreeNode newNode = SplitNode(node, idx, key, value);
             node.Right = Prepend(newNode, node.Right);
             node = ResolveRightRed(node);
             return node;
         }
-        private B3TreeNode SplitNode(B3TreeNode node, int idxAt, K key, V value)
+        private FBBSTreeNode SplitNode(FBBSTreeNode node, int idxAt, K key, V value)
         {
-            B3TreeNode newNode = new(MAX);
+            FBBSTreeNode newNode = new(MAX);
             if (idxAt <= HALF) // in old node
             {
                 for (int i = HALF, j = 0; i < MAX; ++i, ++j)
@@ -212,7 +212,7 @@
             newNode.Len = HALF;
             return newNode;
         }
-        private B3TreeNode RemoveRecur(K key, B3TreeNode node)
+        private FBBSTreeNode RemoveRecur(K key, FBBSTreeNode node)
         {
             if (node.Left != null && key.CompareTo(node.Keys[0]) < 0)
             {
@@ -273,7 +273,7 @@
             return node;
         }
         // Left leaf is short or the parent is short
-        private void HandleLeftLeafOnDelete(B3TreeNode node)
+        private void HandleLeftLeafOnDelete(FBBSTreeNode node)
         {
             int sumLen = node.Len + node.Left!.Len;
             if (sumLen < HALF + MIN)
@@ -299,7 +299,7 @@
             }
         }
         // Right leaf is short.
-        private void HandleRightLeafOnDelete(B3TreeNode node)
+        private void HandleRightLeafOnDelete(FBBSTreeNode node)
         {
             if (node.Len < HALF)
             {
@@ -315,7 +315,7 @@
                 _isDB = false;
             }
         }
-        private B3TreeNode? HandleWithNextOnDelete(B3TreeNode pNode, B3TreeNode curNode)
+        private FBBSTreeNode? HandleWithNextOnDelete(FBBSTreeNode pNode, FBBSTreeNode curNode)
         {
             if (curNode.Left == null)
             {
@@ -339,7 +339,7 @@
             return curNode;
         }
         // Add a new node as the smallest to the root
-        private static B3TreeNode Prepend(B3TreeNode newNode, B3TreeNode? root)
+        private static FBBSTreeNode Prepend(FBBSTreeNode newNode, FBBSTreeNode? root)
         {
             if (root == null)
             {
@@ -349,7 +349,7 @@
             root = ResolveDoubleRed(root);
             return root;
         }
-        private B3TreeNode ResolveDB(B3TreeNode parent, B3TreeNode? child)
+        private FBBSTreeNode ResolveDB(FBBSTreeNode parent, FBBSTreeNode? child)
         {
             if (!_isDB)
             {
@@ -366,7 +366,7 @@
             {
                 bool pc = parent.IsRed;
                 bool px = IsRed(parent.Right!.Left);
-                B3TreeNode nd = LeftRotation(parent);
+                FBBSTreeNode nd = LeftRotation(parent);
                 if (!px)
                 {
                     nd.Left!.IsRed = true;
@@ -441,7 +441,7 @@
                 }
             }
         }
-        private static int FindIndex(B3TreeNode node, K key, out bool found)
+        private static int FindIndex(FBBSTreeNode node, K key, out bool found)
         {
             int lo = 0;
             int hi = node.Len - 1;
@@ -470,21 +470,21 @@
                 mid = (lo + hi) / 2;
             }
         }
-        private static B3TreeNode LeftRotation(B3TreeNode node)
+        private static FBBSTreeNode LeftRotation(FBBSTreeNode node)
         {
             var tmp = node.Right;
             node.Right = node.Right!.Left;
             tmp!.Left = node;
             return tmp;
         }
-        private static B3TreeNode RightRotation(B3TreeNode node)
+        private static FBBSTreeNode RightRotation(FBBSTreeNode node)
         {
             var tmp = node.Left;
             node.Left = node.Left!.Right;
             tmp!.Right = node;
             return tmp;
         }
-        private static bool IsRed(B3TreeNode? node)
+        private static bool IsRed(FBBSTreeNode? node)
         {
             if (node == null)
             {
@@ -492,7 +492,7 @@
             }
             return node.IsRed;
         }
-        private static bool IsDoubleRed(B3TreeNode? node)
+        private static bool IsDoubleRed(FBBSTreeNode? node)
         {
             if (IsRed(node) && IsRed(node!.Left))
             {
@@ -500,7 +500,7 @@
             }
             return false;
         }
-        private static B3TreeNode ResolveDoubleRed(B3TreeNode node)
+        private static FBBSTreeNode ResolveDoubleRed(FBBSTreeNode node)
         {
             if (IsDoubleRed(node.Left))
             {
@@ -509,7 +509,7 @@
             }
             return node;
         }
-        private static B3TreeNode ResolveRightRed(B3TreeNode node)
+        private static FBBSTreeNode ResolveRightRed(FBBSTreeNode node)
         {
             if (IsRed(node.Right))
             {
@@ -543,7 +543,7 @@
                 arr[i + shiftRight] = arr[i];
             }
         }
-        private static void BorrowFromPre(B3TreeNode thisNode, B3TreeNode pre)
+        private static void BorrowFromPre(FBBSTreeNode thisNode, FBBSTreeNode pre)
         {
             int sumLen = pre.Len + thisNode.Len;
             int rightShift = sumLen / 2 - thisNode.Len;
@@ -557,7 +557,7 @@
             thisNode.Len += rightShift;
             pre.Shrink(pre.Len - rightShift);
         }
-        private static void BorrowFromNext(B3TreeNode thisNode, B3TreeNode next)
+        private static void BorrowFromNext(FBBSTreeNode thisNode, FBBSTreeNode next)
         {
             int sumLen = next.Len + thisNode.Len;
             int leftShift = sumLen / 2 - thisNode.Len;
@@ -571,7 +571,7 @@
             thisNode.Len += leftShift;
             next.Shrink(next.Len - leftShift);
         }
-        private static void MergeFromPre(B3TreeNode thisNode, B3TreeNode pre)
+        private static void MergeFromPre(FBBSTreeNode thisNode, FBBSTreeNode pre)
         {
             int rightShift = pre.Len;
             ArrayShiftRight(thisNode.Keys, thisNode.Len, rightShift);
@@ -583,7 +583,7 @@
             }
             thisNode.Len += rightShift;
         }
-        private static void MergeFromNext(B3TreeNode thisNode, B3TreeNode next)
+        private static void MergeFromNext(FBBSTreeNode thisNode, FBBSTreeNode next)
         {
             for (int i = thisNode.Len, j = 0; j < next.Len; ++i, ++j)
             {
