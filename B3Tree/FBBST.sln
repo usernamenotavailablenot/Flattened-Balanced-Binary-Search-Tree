@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.37216.2
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "B3Tree", "B3Tree.csproj", "{B87567D5-1651-4C36-95F8-6EB84E592FA7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FBBST", "FBBST.csproj", "{B87567D5-1651-4C36-95F8-6EB84E592FA7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "..\UnitTest\UnitTest.csproj", "{D1F38A97-31FF-4178-83CF-FD3E10165506}"
 EndProject
