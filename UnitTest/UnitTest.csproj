@@ -13,7 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BPlusTree\BPlusTree\BPlusTree.csproj" />
     <ProjectReference Include="..\FBBST\FBBST.csproj" />
+    <ProjectReference Include="..\LLRBTree\LLRBTree\LLRBTree.csproj" />
   </ItemGroup>
 
 </Project>
