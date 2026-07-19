@@ -10,8 +10,16 @@
     }
     internal abstract class BTreeNode<K> where K : IComparable
     {
+        private ushort _len;
         public K?[] IndexValues;
-        public int Len = 0;
+        public int Len 
+        {
+            get { return _len; }
+            set
+            {
+                _len = (ushort)value;
+            }
+        }
         public BTreeNode<K>? Pre = null;
         public BTreeNode<K>? Next = null;
         public BTreeIndexNode<K>? Parent = null;
@@ -77,7 +85,7 @@
         public V? Deleted;
         public BPlusTree(int min)
         {
-            MIN = min < LEAST ? LEAST : min; // at least 2, such that upper level guaranteed to be at most half
+            MIN = min < LEAST ? LEAST : (min > 4096 ? 4096 : min); // at least 2, such that upper level guaranteed to be at most half
             MAX = 4 * MIN;
             CUTOFF_BORROW_MERGE = 2 * MIN; // merge or borrow upon deletion
             HALF = 2 * MIN;
