@@ -1,4 +1,5 @@
-﻿using FBBST;
+﻿using BTree;
+using FBBST;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using RBTree;
 using System.Diagnostics;
@@ -55,7 +56,7 @@ namespace UnitTest
             }
         }
         [TestMethod]
-        public void TestLLRBTree()
+        public void TestFBBSTreeWithOthers()
         {
             int N = 1000000;
             int MIN = 32;
@@ -84,6 +85,14 @@ namespace UnitTest
             sw.Stop();
             Console.WriteLine($"LLRBT: {sw.ElapsedMilliseconds}");
             sw.Reset();
+
+            BPlusTree<int, int> bPlusTree = new BPlusTree<int, int>(MIN);
+            GC.Collect();
+            sw.Start();
+            TestBPlusTree(bPlusTree, insert, delete, N);
+            sw.Stop();
+            Console.WriteLine($"BPlusTree: {sw.ElapsedMilliseconds}");
+            sw.Reset();
         }
         private void TestFbbsTree(FBBSTree<int, int> tree, int[] insert, int[] delete, int N)
         {
@@ -103,6 +112,23 @@ namespace UnitTest
             }
         }
         private void TestLLRBT(LLRBTree<int, int> tree, int[] insert, int[] delete, int N)
+        {
+            for (int i = 0; i < N; ++i)
+            {
+                int k = insert[i];
+                tree.Add(k, k);
+                bool b = tree.HasKey(k);
+                Assert.IsTrue(b);
+            }
+            for (int i = 0; i < N; ++i)
+            {
+                int k = delete[i];
+                tree.Remove(k);
+                bool b = tree.HasKey(k);
+                Assert.IsFalse(b);
+            }
+        }
+        private void TestBPlusTree(BPlusTree<int, int> tree, int[] insert, int[] delete, int N)
         {
             for (int i = 0; i < N; ++i)
             {
