@@ -145,6 +145,15 @@ The run time complexity is obviously `Log(N)` for search, insertion, and deletio
 - min = 127 222 201 201 201 205 202 205 206 201 203
 - min = 128 214 201 204 203 211 202 205 211 207 204
 
+# Comparison with Red-Black Tree and B+ Tree
+Below is an example result from the unit testing of 1,000,000 random insertions and deletions.
+In performance of both time and space, Flattened-BBST is slightly better then B+ tree and much better than balanced BST.
+
+|          | Time (ms) | Space (bytes) |
+| -------- | --------- | ------------- |
+| FBBST    |  3018     |   12,638,112  |
+| LLRBT    |  6414     |   48,000,000  |
+| B+ Tree  |  3519     |   12,776,592  |
 
 # Algorithms
 The algorithms have features from both BST and B tree.
