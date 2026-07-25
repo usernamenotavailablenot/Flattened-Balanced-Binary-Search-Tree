@@ -148,12 +148,14 @@ The run time complexity is obviously `Log(N)` for search, insertion, and deletio
 # Comparison with Red-Black Tree and B+ Tree
 Below is an example result from the unit testing of 1,000,000 random insertions and deletions.
 In performance of both time and space, Flattened-BBST is slightly better then B+ tree and much better than balanced BST.
+The built-in .NET SortedDictionary is implemented using RB tree, which takes greater space.
 
-|          | Time (ms) | Space (bytes) |
-| -------- | --------- | ------------- |
-| FBBST    |  3018     |   12,638,112  |
-| LLRBT    |  6414     |   48,000,000  |
-| B+ Tree  |  3519     |   12,776,592  |
+|                        | Time (ms) | Space (bytes) |
+| ---------------------- | --------- | ------------- |
+| FBBST                  |   2636    |   12,638,112  |
+| LLRB Tree              |   5660    |   48,000,000  |
+| B+ Tree                |   2668    |   12,776,592  |
+| .NET SortedDictionary  |   2808    |   48,000,000  |
 
 # Algorithms
 The algorithms have features from both BST and B tree.
