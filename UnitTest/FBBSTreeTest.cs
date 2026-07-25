@@ -92,6 +92,14 @@ namespace UnitTest
             sw.Stop();
             Console.WriteLine($"BPlusTree: {sw.ElapsedMilliseconds}");
             sw.Reset();
+
+            SortedDictionary<int, int> kvps = new SortedDictionary<int, int>();
+            GC.Collect();
+            sw.Start();
+            TestSortedDictionary(kvps, insert, delete, N);
+            sw.Stop();
+            Console.WriteLine($"SortedDictionary: {sw.ElapsedMilliseconds}");
+            sw.Reset();
         }
         private void TestFbbsTree(FBBSTree<int, int> tree, int[] insert, int[] delete, int N)
         {
@@ -141,6 +149,23 @@ namespace UnitTest
                 int k = delete[i];
                 tree.Remove(k);
                 bool b = tree.HasKey(k);
+                Assert.IsFalse(b);
+            }
+        }
+        private void TestSortedDictionary(SortedDictionary<int, int> tree, int[] insert, int[] delete, int N)
+        {
+            for (int i = 0; i < N; ++i)
+            {
+                int k = insert[i];
+                tree.Add(k, k);
+                bool b = tree.ContainsKey(k);
+                Assert.IsTrue(b);
+            }
+            for (int i = 0; i < N; ++i)
+            {
+                int k = delete[i];
+                tree.Remove(k);
+                bool b = tree.ContainsKey(k);
                 Assert.IsFalse(b);
             }
         }
